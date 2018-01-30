@@ -9,7 +9,7 @@ package testtscomm;
  *
  * @author bowen
  */
-public class ServerPacket {
+public class ServerPacket implements LowLevelPacket {
     
     private final byte[] raw;
     
@@ -20,6 +20,7 @@ public class ServerPacket {
         raw = data;
     }
 
+    @Override
     public byte[] getRaw() {
         return raw;
     }

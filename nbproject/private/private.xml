@@ -3,7 +3,10 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/C:/Users/bowen/Documents/NetBeansProjects/TestTSComm/src/testtscomm/TestTSComm.java</file>
+            <file>file:/C:/Users/bowen/Documents/GitHub/TSClient4J/src/testtscomm/ServerPacket.java</file>
+            <file>file:/C:/Users/bowen/Documents/GitHub/TSClient4J/src/testtscomm/ClientPacket.java</file>
+            <file>file:/C:/Users/bowen/Documents/GitHub/TSClient4J/src/testtscomm/Packet.java</file>
+            <file>file:/C:/Users/bowen/Documents/GitHub/TSClient4J/src/testtscomm/TestTSComm.java</file>
         </group>
     </open-files>
 </project-private>

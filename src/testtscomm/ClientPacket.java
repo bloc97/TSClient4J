@@ -9,10 +9,7 @@ package testtscomm;
  *
  * @author bowen
  */
-public class ClientPacket {
-    public static enum Type {
-        VOICE, WHISPER, COMMAND, COMMANDLOW, PING, PONG, ACK, ACKLOW, INIT
-    }
+public class ClientPacket implements LowLevelPacket {
     
     private final byte[] raw;
     
@@ -35,6 +32,7 @@ public class ClientPacket {
         }
     }
 
+    @Override
     public byte[] getRaw() {
         return raw;
     }
