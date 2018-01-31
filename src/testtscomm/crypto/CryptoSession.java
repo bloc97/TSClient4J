@@ -178,7 +178,7 @@ public class CryptoSession {
         }
         System.out.println(Arrays.toString(eaxCipher.getMac()));
         byte[] header = packet.getHeader();
-        packet.setRaw(new byte[CryptoUtils.CLIENTHEADER_LENGTH + len]);
+        packet.setRaw(new byte[CryptoUtils.CLIENTHEADER_LENGTH + len - CryptoUtils.MAC_LENGTH]);
         
         System.arraycopy(result, len - CryptoUtils.MAC_LENGTH, packet.getRaw(), 0, CryptoUtils.MAC_LENGTH);
         System.arraycopy(header, 0, packet.getRaw(), CryptoUtils.MAC_LENGTH, CryptoUtils.CLIENTHEADER_LENGTH - CryptoUtils.MAC_LENGTH);

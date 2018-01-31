@@ -77,8 +77,8 @@ public class ClientPacket implements LowLevelPacket {
     
     @Override
     public byte[] getHeader() {
-        byte[] header = new byte[CryptoUtils.CLIENTHEADER_LENGTH];
-        System.arraycopy(raw, 0, header, 0, header.length);
+        byte[] header = new byte[CryptoUtils.CLIENTHEADER_LENGTH - CryptoUtils.MAC_LENGTH];
+        System.arraycopy(raw, CryptoUtils.MAC_LENGTH, header, 0, header.length);
         return header;
     }
     
