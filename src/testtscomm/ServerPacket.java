@@ -5,6 +5,7 @@
  */
 package testtscomm;
 
+import packets.LowLevelPacket;
 import testtscomm.crypto.CryptoUtils;
 
 /**
@@ -30,14 +31,14 @@ public class ServerPacket implements LowLevelPacket {
     }
 
     @Override
-    public byte[] getPayload() {
+    public byte[] getPayloadCopy() {
         byte[] payload = new byte[raw.length - CryptoUtils.SERVERHEADER_LENGTH];
         System.arraycopy(raw, CryptoUtils.SERVERHEADER_LENGTH, payload, 0, payload.length);
         return payload;
     }
 
     @Override
-    public byte[] getMac() {
+    public byte[] getMacCopy() {
         byte[] mac = new byte[8];
         System.arraycopy(raw, 0, mac, 0, 8);
         return mac;
@@ -65,7 +66,7 @@ public class ServerPacket implements LowLevelPacket {
     
     
     @Override
-    public byte[] getHeader() {
+    public byte[] getHeaderCopy() {
         byte[] header = new byte[CryptoUtils.SERVERHEADER_LENGTH - CryptoUtils.MAC_LENGTH];
         System.arraycopy(raw, CryptoUtils.MAC_LENGTH, header, 0, header.length);
         return header;

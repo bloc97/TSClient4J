@@ -15,7 +15,7 @@ import org.bouncycastle.crypto.params.AEADParameters;
 import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.math.ec.ECPoint;
 import testtscomm.ClientPacket;
-import testtscomm.LowLevelPacket;
+import packets.LowLevelPacket;
 import testtscomm.ServerPacket;
 import static testtscomm.crypto.CryptoUtils.TS3INIT_MAC;
 
@@ -161,23 +161,23 @@ public class CryptoSession {
             return;
         }
         KeyNonce keyNonce = getKeyNonce(false, packet.getPid(), packet.getGid(), packet.getPt());
-        CipherParameters parameters = new AEADParameters(new KeyParameter(keyNonce.getKey()), CryptoUtils.MAC_LENGTH * 8, keyNonce.getNonce(), packet.getHeader());
+        CipherParameters parameters = new AEADParameters(new KeyParameter(keyNonce.getKey()), CryptoUtils.MAC_LENGTH * 8, keyNonce.getNonce(), packet.getHeaderCopy());
         
         byte[] result;
         int len;
         
         synchronized (eaxCipher) {
             eaxCipher.init(true, parameters);
-            result = new byte[eaxCipher.getOutputSize(packet.getPayload().length)];
+            result = new byte[eaxCipher.getOutputSize(packet.getPayloadCopy().length)];
             try {
-                len = eaxCipher.processBytes(packet.getPayload(), 0, packet.getPayload().length, result, 0);
+                len = eaxCipher.processBytes(packet.getPayloadCopy(), 0, packet.getPayloadCopy().length, result, 0);
                 len += eaxCipher.doFinal(result, len);
             } catch (Exception ex) {
                 throw new IllegalStateException("Internal encryption error!");
             }
         }
         System.out.println(Arrays.toString(eaxCipher.getMac()));
-        byte[] header = packet.getHeader();
+        byte[] header = packet.getHeaderCopy();
         packet.setRaw(new byte[CryptoUtils.CLIENTHEADER_LENGTH + len - CryptoUtils.MAC_LENGTH]);
         
         System.arraycopy(result, len - CryptoUtils.MAC_LENGTH, packet.getRaw(), 0, CryptoUtils.MAC_LENGTH);
@@ -203,7 +203,7 @@ public class CryptoSession {
         KeyNonce keyNonce = getKeyNonce(true, packet.getPid(), packet.getGid(), packet.getPt());
         int dataLength = packet.getRaw().length - CryptoUtils.SERVERHEADER_LENGTH;
         
-        CipherParameters parameters = new AEADParameters(new KeyParameter(keyNonce.getKey()), CryptoUtils.MAC_LENGTH * 8, keyNonce.getNonce(), packet.getHeader());
+        CipherParameters parameters = new AEADParameters(new KeyParameter(keyNonce.getKey()), CryptoUtils.MAC_LENGTH * 8, keyNonce.getNonce(), packet.getHeaderCopy());
         
         try {
             byte[] result;
@@ -239,7 +239,7 @@ public class CryptoSession {
         KeyNonce keyNonce = getKeyNonce(true, packet.getPid(), packet.getGid(), packet.getPt());
         int dataLength = packet.getRaw().length - CryptoUtils.CLIENTHEADER_LENGTH;
         
-        CipherParameters parameters = new AEADParameters(new KeyParameter(keyNonce.getKey()), CryptoUtils.MAC_LENGTH * 8, keyNonce.getNonce(), packet.getHeader());
+        CipherParameters parameters = new AEADParameters(new KeyParameter(keyNonce.getKey()), CryptoUtils.MAC_LENGTH * 8, keyNonce.getNonce(), packet.getHeaderCopy());
         
         try {
             byte[] result;
