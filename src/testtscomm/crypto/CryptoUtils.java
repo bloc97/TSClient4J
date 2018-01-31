@@ -16,6 +16,7 @@ import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.DERBitString;
 import org.bouncycastle.asn1.DERSequence;
+import org.bouncycastle.asn1.DLSequence;
 import org.bouncycastle.asn1.cryptopro.ECGOST3410NamedCurves;
 import org.bouncycastle.asn1.nist.NISTNamedCurves;
 import org.bouncycastle.asn1.sec.SECNamedCurves;
@@ -99,7 +100,7 @@ public abstract class CryptoUtils {
     
     
     public static ECPoint importPublicKey(byte[] asnByteArray) throws IOException {
-        DERSequence sequence = (DERSequence)DERSequence.fromByteArray(asnByteArray);
+        DLSequence sequence = (DLSequence)DERSequence.fromByteArray(asnByteArray);
         ASN1Integer x = (ASN1Integer)sequence.getObjectAt(2);
         ASN1Integer y = (ASN1Integer)sequence.getObjectAt(3);
         
@@ -107,7 +108,7 @@ public abstract class CryptoUtils {
     }
     
     public static KeyPair importPublicAndPrivateKey(byte[] asnByteArray) throws IOException {
-        DERSequence sequence = (DERSequence)DERSequence.fromByteArray(asnByteArray);
+        DLSequence sequence = (DLSequence)DERSequence.fromByteArray(asnByteArray);
         ASN1Integer x = (ASN1Integer)sequence.getObjectAt(2);
         ASN1Integer y = (ASN1Integer)sequence.getObjectAt(3);
         ASN1Integer k = (ASN1Integer)sequence.getObjectAt(4);
@@ -197,7 +198,7 @@ public abstract class CryptoUtils {
         digest.update(data, offset, length == 0 ? data.length - offset : length);
         
         byte[] result = new byte[digest.getDigestSize()];
-        digest.doFinal(data, 0);
+        digest.doFinal(result, 0);
         return result;
     }
     
