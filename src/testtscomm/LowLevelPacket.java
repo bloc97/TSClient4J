@@ -16,4 +16,12 @@ public interface LowLevelPacket {
     }
     
     public byte[] getRaw();
+    public byte[] getPayload();
+    public byte[] getMac();
+    public short getPid();
+    public byte getPt();
+    public int getGid();
+    public byte[] getHeader();
+    
+    public void setRaw(byte[] raw);
 }

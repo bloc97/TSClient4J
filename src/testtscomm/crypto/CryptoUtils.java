@@ -10,6 +10,7 @@ import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.util.Base64;
+import java.util.Random;
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
@@ -35,6 +36,7 @@ import org.bouncycastle.crypto.params.ECKeyGenerationParameters;
 import org.bouncycastle.crypto.params.ECPrivateKeyParameters;
 import org.bouncycastle.crypto.params.ECPublicKeyParameters;
 import org.bouncycastle.crypto.params.KeyParameter;
+import org.bouncycastle.crypto.prng.FixedSecureRandom;
 import org.bouncycastle.math.ec.ECPoint;
 
 /**
@@ -45,7 +47,7 @@ public abstract class CryptoUtils {
     
     private static final String DUMMYSTRING = "c:\\windows\\system\\firewall32.cpl";
     private static final byte[] DUMMYKEY = DUMMYSTRING.substring(0, 16).getBytes(StandardCharsets.US_ASCII);
-    private static final byte[] DUMMYNONCE = DUMMYSTRING.substring(16, 16).getBytes(StandardCharsets.US_ASCII);
+    private static final byte[] DUMMYNONCE = DUMMYSTRING.substring(16, 32).getBytes(StandardCharsets.US_ASCII);
     public static final KeyNonce DUMMYPAIR = new KeyNonce(DUMMYKEY, DUMMYNONCE);
     
     
@@ -56,8 +58,8 @@ public abstract class CryptoUtils {
     private static final ECKeyGenerationParameters keyGenerator = new ECKeyGenerationParameters(lookupParameters(X9ObjectIdentifiers.prime256v1), secureRandom);
     
     public static final int MAC_LENGTH = 8;
-    public static final int CLIENTHEADER_LENGTH = 5;
-    public static final int SERVERHEADER_LENGTH = 3;
+    public static final int CLIENTHEADER_LENGTH = 5+8;
+    public static final int SERVERHEADER_LENGTH = 3+8;
     public static final int PACKET_TYPES = 9;
                 
     private static ECDomainParameters lookupParameters(ASN1ObjectIdentifier identifier) {
@@ -149,7 +151,7 @@ public abstract class CryptoUtils {
     
     
     //Translated from https://github.com/Splamy/TS3AudioBot/blob/master/TS3Client/Full/Ts3Crypt.cs
-    private static boolean checkEqual(byte[] a1, int a1Index, byte[] a2, int a2Index, int len) {
+    public static boolean checkEqual(byte[] a1, int a1Index, byte[] a2, int a2Index, int len) {
         for (int i = 0; i < len; i++) {
             if (a1[i + a1Index] != a2[i + a2Index]) {
                 return false;
@@ -158,7 +160,7 @@ public abstract class CryptoUtils {
         return true;
     }
     //Translated from https://github.com/Splamy/TS3AudioBot/blob/master/TS3Client/Full/Ts3Crypt.cs
-    private static void xorBinary(byte[] a, byte[] b, int len, byte[] outBuf) {
+    public static void xorBinary(byte[] a, byte[] b, int len, byte[] outBuf) {
         if (a.length < len || b.length < len || outBuf.length < len) {
             throw new IllegalArgumentException();
         }
@@ -171,22 +173,22 @@ public abstract class CryptoUtils {
     private static final SHA1Digest sha1 = new SHA1Digest();
     private static final SHA256Digest sha256 = new SHA256Digest();
     
-    private static byte[] hash1It(byte[] data) {
+    public static byte[] hash1It(byte[] data) {
         return hash1It(data, 0, 0);
     }
-    private static byte[] hash1It(byte[] data, int offset) {
+    public static byte[] hash1It(byte[] data, int offset) {
         return hash1It(data, offset, 0);
     }
-    private static byte[] hash1It(byte[] data, int offset, int length) {
+    public static byte[] hash1It(byte[] data, int offset, int length) {
         return hashIt(sha1, data, offset, length);
     }
-    private static byte[] hash256It(byte[] data) {
+    public static byte[] hash256It(byte[] data) {
         return hash256It(data, 0, 0);
     }
-    private static byte[] hash256It(byte[] data, int offset) {
+    public static byte[] hash256It(byte[] data, int offset) {
         return hash256It(data, offset, 0);
     }
-    private static byte[] hash256It(byte[] data, int offset, int length) {
+    public static byte[] hash256It(byte[] data, int offset, int length) {
         return hashIt(sha256, data, offset, length);
     }
     
@@ -210,10 +212,34 @@ public abstract class CryptoUtils {
     //Equals Long.toString(Long.MAX_VALUE).length()
     private static final int maxUlongStringLen = 20;
     
+    public static Identity generateIdentity() throws IOException {
+        return generateIdentity(8);
+    }
+    
     public static Identity generateIdentity(int securityLevel) throws IOException {
         X9ECParameters params = ECNamedCurveTable.getByOID(X9ObjectIdentifiers.prime256v1);
         ECDomainParameters domainParams = new ECDomainParameters(params.getCurve(), params.getG(), params.getN(), params.getH(), params.getSeed());
         ECKeyGenerationParameters keyParams = new ECKeyGenerationParameters(domainParams, secureRandom);
+        ECKeyPairGenerator generator = new ECKeyPairGenerator();
+        generator.init(keyParams);
+        AsymmetricCipherKeyPair keyPair = generator.generateKeyPair();
+        
+        ECPrivateKeyParameters privateKey = (ECPrivateKeyParameters) keyPair.getPrivate();
+        ECPublicKeyParameters publicKey = (ECPublicKeyParameters) keyPair.getPublic();
+        
+        Identity identity = loadIdentity(new KeyPair(publicKey.getQ().normalize(), privateKey.getD()), 0, 0);
+        improveSecurity(identity, securityLevel);
+        return identity;
+    }
+    
+    public static Identity generateTestIdentity(int securityLevel) throws IOException {
+        byte[] fixedSource = new byte[1000000];
+        Random random = new Random(34622);
+        random.nextBytes(fixedSource);
+        
+        X9ECParameters params = ECNamedCurveTable.getByOID(X9ObjectIdentifiers.prime256v1);
+        ECDomainParameters domainParams = new ECDomainParameters(params.getCurve(), params.getG(), params.getN(), params.getH(), params.getSeed());
+        ECKeyGenerationParameters keyParams = new ECKeyGenerationParameters(domainParams, new org.bouncycastle.util.test.FixedSecureRandom(fixedSource));
         ECKeyPairGenerator generator = new ECKeyPairGenerator();
         generator.init(keyParams);
         AsymmetricCipherKeyPair keyPair = generator.generateKeyPair();
