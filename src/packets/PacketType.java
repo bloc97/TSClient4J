@@ -8,10 +8,7 @@ package packets;
 /**
  *
  * @author bowen
- * @param <E>
  */
-public interface Payload<E extends Payload<E>> {
-    public byte[] getRaw();
-    public E setRaw(byte[] raw);
-    public int length();
+public enum PacketType {
+    VOICE, WHISPER, COMMAND, COMMANDLOW, PING, PONG, ACK, ACKLOW, INIT
 }

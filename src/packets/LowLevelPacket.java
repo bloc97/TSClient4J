@@ -10,15 +10,12 @@ package packets;
  * @author bowen
  * @param <E>
  */
-public interface LowLevelPacket<E extends LowLevelPacket<E>> {
+public interface LowLevelPacket {
     public static final int MAC_LENGTH = 8;
-    public static enum Type {
-        VOICE, WHISPER, COMMAND, COMMANDLOW, PING, PONG, ACK, ACKLOW, INIT
-    }
     
     public byte[] getRaw();
     
-    public E setRaw(byte[] raw);
+    public LowLevelPacket setRaw(byte[] raw);
     
     public default byte[] getMacCopy() {
         byte[] mac = new byte[getMacLength()];
@@ -36,21 +33,21 @@ public interface LowLevelPacket<E extends LowLevelPacket<E>> {
         return payload;
     }
     
-    public default E setMac(byte[] mac) {
+    public default LowLevelPacket setMac(byte[] mac) {
         if (mac.length != getMacLength()) {
             throw new IllegalArgumentException("Unexpected MAC array size!");
         }
         System.arraycopy(mac, 0, getRaw(), 0, mac.length);
-        return (E) this;
+        return this;
     }
-    public default E setHeader(byte[] header) {
+    public default LowLevelPacket setHeader(byte[] header) {
         if (header.length != getHeaderLength()) {
             throw new IllegalArgumentException("Unexpected Header array size!");
         }
         System.arraycopy(header, 0, getRaw(), getMacLength(), header.length);
-        return (E) this;
+        return this;
     }
-    public default E setPayload(byte[] payload) {
+    public default LowLevelPacket setPayload(byte[] payload) {
         int totalHeaderLength = getMacLength() + getHeaderLength();
         if (payload.length != getPayloadLength()) {
             byte[] raw = getRaw();
@@ -59,7 +56,7 @@ public interface LowLevelPacket<E extends LowLevelPacket<E>> {
             setRaw(newRaw);
         }
         System.arraycopy(payload, 0, getRaw(), totalHeaderLength, payload.length);
-        return (E) this;
+        return this;
     }
     
     public long getUid();
@@ -70,19 +67,19 @@ public interface LowLevelPacket<E extends LowLevelPacket<E>> {
         return (int)((getUid() >> 16) & 0xFFFFFFFF);
     }
     
-    public E setUid(long uid);
-    public E setPid(short pid);
-    public default E setPid(int pid) {
+    public LowLevelPacket setUid(long uid);
+    public LowLevelPacket setPid(short pid);
+    public default LowLevelPacket setPid(int pid) {
         return setPid((short) (pid & 0xFFFF));
     }
-    public E setGid(int gid);
+    public LowLevelPacket setGid(int gid);
     
     public default byte getPt() {
         return getRaw()[getMacLength() + getHeaderLength() - 1];
     }
-    public default E setPt(byte pt) {
+    public default LowLevelPacket setPt(byte pt) {
         getRaw()[getMacLength() + getHeaderLength() - 1] = pt;
-        return (E) this;
+        return this;
     }
     
     public default int length() {
@@ -96,23 +93,59 @@ public interface LowLevelPacket<E extends LowLevelPacket<E>> {
         return length() - (getMacLength() + getHeaderLength());
     }
     
-    public default Type getType() {
+    public default PacketType getType() {
         int index = getPt() & 0xF;
-        if (index >= Type.values().length) {
+        if (index >= PacketType.values().length) {
             throw new IllegalStateException("Packet type is undefined!");
         }
-        return Type.values()[index];
+        return PacketType.values()[index];
     }
-    public default E setType(Type type) {
-        Type[] types = Type.values();
+    public default LowLevelPacket setType(PacketType type) {
+        PacketType[] types = PacketType.values();
         for (int i=0; i<types.length; i++) {
             if (types[i].equals(type)) {
                 byte newPt = (byte)((getPt() & 0xF0) | (i & 0xF));
                 setPt(newPt);
-                return (E) this;
+                return this;
             }
         }
         throw new IllegalStateException("Unexpected error when searching for packet type!");
+    }
+    
+    public default boolean isUnencrypted() {
+        return retrievePtBit(getPt(), 7);
+    }
+    public default LowLevelPacket setIsUnencrypted(boolean isUnencrypted) {
+        setPtBit(this, isUnencrypted, 7);
+        return this;
+    }
+    public default boolean isCompressed() {
+        return retrievePtBit(getPt(), 6);
+    }
+    public default LowLevelPacket setIsCompressed(boolean isCompressed) {
+        setPtBit(this, isCompressed, 6);
+        return this;
+    }
+    public default boolean isNewProtocol() {
+        return retrievePtBit(getPt(), 5);
+    }
+    public default LowLevelPacket setIsNewProtocol(boolean isNewProtocol) {
+        setPtBit(this, isNewProtocol, 5);
+        return this;
+    }
+    public default boolean isFragmented() {
+        return retrievePtBit(getPt(), 4);
+    }
+    public default LowLevelPacket setIsFragmented(boolean isFragmented) {
+        setPtBit(this, isFragmented, 4);
+        return this;
+    }
+    
+    public static long replacePidInUid(short pid, long uid) {
+        return (uid & 0xFFFFFFFFFFFF0000L) | pid;
+    }
+    public static long replaceGidInUid(int gid, long uid) {
+        return (uid & 0xFFFF00000000FFFFL) | gid;
     }
     
     public static void setPtBit(LowLevelPacket packet, boolean b, int pos) {
@@ -125,32 +158,35 @@ public interface LowLevelPacket<E extends LowLevelPacket<E>> {
         packet.setPt(newPt);
     }
     
-    public default boolean isUnencrypted() {
-        return ((getPt() >> 7) & 1) == 1;
+    public static boolean retrievePtBit(byte pt, int pos) {
+        return ((pt >> pos) & 1) == 1;
     }
-    public default E setIsUnencrypted(boolean isUnencrypted) {
-        setPtBit(this, isUnencrypted, 7);
-        return (E) this;
+    
+    public static short bytesToShort(byte msb, byte lsb) {
+        return (short)(((msb & 0xFF) << 8) | (lsb & 0xFF));
     }
-    public default boolean isCompressed() {
-        return ((getPt() >> 6) & 1) == 1;
+    
+    public static short bytesToShort(byte[] data, int startOffset) {
+        return bytesToShort(data, startOffset, true);
     }
-    public default E setIsCompressed(boolean isCompressed) {
-        setPtBit(this, isCompressed, 6);
-        return (E) this;
+    public static short bytesToShort(byte[] data, int startOffset, boolean isBigEndian) {
+        if (isBigEndian) {
+            return bytesToShort(data[startOffset], data[startOffset + 1]);
+        } else {
+            return bytesToShort(data[startOffset + 1], data[startOffset]);
+        }
     }
-    public default boolean isNewProtocol() {
-        return ((getPt() >> 5) & 1) == 1;
+    
+    public static void shortToBytes(short value, byte[] data, int startOffset) {
+        shortToBytes(value, data, startOffset, true);
     }
-    public default E setIsNewProtocol(boolean isNewProtocol) {
-        setPtBit(this, isNewProtocol, 5);
-        return (E) this;
-    }
-    public default boolean isFragmented() {
-        return ((getPt() >> 4) & 1) == 1;
-    }
-    public default E setIsFragmented(boolean isFragmented) {
-        setPtBit(this, isFragmented, 4);
-        return (E) this;
+    public static void shortToBytes(short value, byte[] data, int startOffset, boolean isBigEndian) {
+        if (isBigEndian) {
+            data[startOffset    ] = (byte)((value >> 8) & 0xFF);
+            data[startOffset + 1] = (byte)((value     ) & 0xFF);
+        } else {
+            data[startOffset    ] = (byte)((value     ) & 0xFF);
+            data[startOffset + 1] = (byte)((value >> 8) & 0xFF);
+        }
     }
 }

@@ -10,7 +10,7 @@ package packets;
  * @author bowen
  * @param <E>
  */
-public class LowLevelServerPacket<E extends LowLevelServerPacket<E>> implements LowLevelPacket<LowLevelServerPacket<E>> {
+public class LowLevelServerPacket implements LowLevelPacket {
     
     public final static int HEADER_LENGTH = 3;
     
@@ -27,12 +27,12 @@ public class LowLevelServerPacket<E extends LowLevelServerPacket<E>> implements 
     }
 
     @Override
-    public E setRaw(byte[] raw) {
+    public LowLevelServerPacket setRaw(byte[] raw) {
         if (raw.length < getMacLength() + getHeaderLength()) {
             throw new IllegalArgumentException("Unexpected RAW array size!");
         }
         this.raw = raw;
-        return (E) this;
+        return this;
     }
 
     @Override
@@ -41,33 +41,82 @@ public class LowLevelServerPacket<E extends LowLevelServerPacket<E>> implements 
     }
     
     protected void setInternalPid(short pid) {
-        getRaw()[getMacLength()    ] = (byte)((uid >> 8) & 0xFF);
-        getRaw()[getMacLength() + 1] = (byte)((uid     ) & 0xFF);
+        LowLevelPacket.shortToBytes(pid, getRaw(), getMacLength());
     }
     
     @Override
-    public E setUid(long uid) {
+    public LowLevelServerPacket setUid(long uid) {
         this.uid = uid;
         setInternalPid((short)(uid & 0xFFFF));
-        return (E) this;
+        return this;
     }
 
     @Override
-    public E setPid(short pid) {
-        this.uid = (uid & 0xFFFFFFFFFFFF0000L) | pid;
+    public LowLevelServerPacket setPid(short pid) {
+        this.uid = LowLevelPacket.replacePidInUid(pid, uid);
         setInternalPid(pid);
-        return (E) this;
+        return this;
     }
 
     @Override
-    public E setGid(int gid) {
-        this.uid = (uid & 0xFFFF00000000FFFFL) | gid;
-        return (E) this;
+    public LowLevelServerPacket setGid(int gid) {
+        this.uid = LowLevelPacket.replaceGidInUid(gid, uid);
+        return this;
     }
 
     @Override
     public int getHeaderLength() {
         return HEADER_LENGTH;
+    }
+
+    @Override
+    public LowLevelServerPacket setIsFragmented(boolean isFragmented) {
+        return (LowLevelServerPacket) LowLevelPacket.super.setIsFragmented(isFragmented);
+    }
+
+    @Override
+    public LowLevelServerPacket setIsNewProtocol(boolean isNewProtocol) {
+        return (LowLevelServerPacket) LowLevelPacket.super.setIsNewProtocol(isNewProtocol);
+    }
+
+    @Override
+    public LowLevelServerPacket setIsCompressed(boolean isCompressed) {
+        return (LowLevelServerPacket) LowLevelPacket.super.setIsCompressed(isCompressed);
+    }
+
+    @Override
+    public LowLevelServerPacket setIsUnencrypted(boolean isUnencrypted) {
+        return (LowLevelServerPacket) LowLevelPacket.super.setIsUnencrypted(isUnencrypted);
+    }
+
+    @Override
+    public LowLevelServerPacket setType(PacketType type) {
+        return (LowLevelServerPacket) LowLevelPacket.super.setType(type);
+    }
+
+    @Override
+    public LowLevelServerPacket setPt(byte pt) {
+        return (LowLevelServerPacket) LowLevelPacket.super.setPt(pt);
+    }
+
+    @Override
+    public LowLevelServerPacket setPid(int pid) {
+        return (LowLevelServerPacket) LowLevelPacket.super.setPid(pid);
+    }
+
+    @Override
+    public LowLevelServerPacket setPayload(byte[] payload) {
+        return (LowLevelServerPacket) LowLevelPacket.super.setPayload(payload);
+    }
+
+    @Override
+    public LowLevelServerPacket setHeader(byte[] header) {
+        return (LowLevelServerPacket) LowLevelPacket.super.setHeader(header);
+    }
+
+    @Override
+    public LowLevelServerPacket setMac(byte[] mac) {
+        return (LowLevelServerPacket) LowLevelPacket.super.setMac(mac);
     }
     
     
