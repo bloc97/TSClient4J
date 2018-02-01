@@ -33,16 +33,24 @@ public final class HandShakePayload4 extends InitPayload {
             
             //RSA Puzzle
             BigInteger ex = new BigInteger("2");
-            ex.pow(payload3.getLevel());
+            ex = ex.pow(payload3.getLevel());
             BigInteger y = payload3.getX().modPow(ex, payload3.getN());
-            
+            System.out.println("Y TEST");
+            System.out.println(y);
             //Pad to length of 64
             byte[] yByte = y.toByteArray();
             if (yByte.length < 64) {
                 byte[] tempYByte = new byte[64];
                 System.arraycopy(yByte, 0, tempYByte, 64 - yByte.length, yByte.length);
                 yByte = tempYByte;
+            } if (yByte.length > 64) {
+                byte[] tempYByte = new byte[64];
+                System.arraycopy(yByte, yByte.length - 64, tempYByte, 0, tempYByte.length);
+                yByte = tempYByte;
+                //throw new IllegalStateException("y bigger than y mod n!");
             }
+            System.out.println(Arrays.toString(yByte));
+            System.out.println(bigEndianByteArrToBigInteger(yByte));
             stream.write(yByte);
             
             stream.write(clientinitiv);

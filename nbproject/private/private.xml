@@ -3,16 +3,11 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/C:/Users/bowen/Documents/GitHub/TSClient4J/src/testtscomm/ServerPacket.java</file>
-            <file>file:/C:/Users/bowen/Documents/GitHub/TSClient4J/src/testtscomm/crypto/Identity.java</file>
-            <file>file:/C:/Users/bowen/Documents/GitHub/TSClient4J/src/testtscomm/crypto/KeyNonceCached.java</file>
-            <file>file:/C:/Users/bowen/Documents/GitHub/TSClient4J/src/testtscomm/crypto/CryptoUtils.java</file>
-            <file>file:/C:/Users/bowen/Documents/GitHub/TSClient4J/src/testtscomm/crypto/KeyPair.java</file>
-            <file>file:/C:/Users/bowen/Documents/GitHub/TSClient4J/src/testtscomm/ClientPacket.java</file>
-            <file>file:/C:/Users/bowen/Documents/GitHub/TSClient4J/src/testtscomm/LowLevelPacket.java</file>
-            <file>file:/C:/Users/bowen/Documents/GitHub/TSClient4J/src/testtscomm/crypto/CryptoSession.java</file>
-            <file>file:/C:/Users/bowen/Documents/GitHub/TSClient4J/src/testtscomm/crypto/KeyNonce.java</file>
-            <file>file:/C:/Users/bowen/Documents/GitHub/TSClient4J/src/testtscomm/TestTSComm.java</file>
+            <file>file:/C:/Users/bowen/Documents/NetBeansProjects/TestTSComm/src/packets/payloads/handshake/HandShakePayload0.java</file>
+            <file>file:/C:/Users/bowen/Documents/NetBeansProjects/TestTSComm/src/packets/payloads/handshake/HandShakePayload3.java</file>
+            <file>file:/C:/Users/bowen/Documents/NetBeansProjects/TestTSComm/src/testtscomm/TestTSComm.java</file>
+            <file>file:/C:/Users/bowen/Documents/NetBeansProjects/TestTSComm/src/packets/payloads/handshake/HandShakePayload4.java</file>
+            <file>file:/C:/Users/bowen/Documents/NetBeansProjects/TestTSComm/src/packets/payloads/handshake/HandShakePayload1.java</file>
         </group>
     </open-files>
 </project-private>
