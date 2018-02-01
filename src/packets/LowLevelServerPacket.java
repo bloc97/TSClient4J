@@ -14,12 +14,8 @@ public class LowLevelServerPacket implements LowLevelPacket {
     
     public final static int HEADER_LENGTH = 3;
     
-    private byte[] raw;
+    private byte[] raw = new byte[getMacLength() + getHeaderLength()];
     private long uid;
-
-    public LowLevelServerPacket(byte[] raw) {
-        setRaw(raw);
-    }
     
     @Override
     public byte[] getRaw() {

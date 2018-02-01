@@ -14,10 +14,6 @@ public class LowLevelClientPacket extends LowLevelServerPacket {
 
     public final static int HEADER_LENGTH = 5;
 
-    public LowLevelClientPacket(byte[] raw) {
-        super(raw);
-    }
-
     @Override
     public int getHeaderLength() {
         return HEADER_LENGTH;
@@ -34,6 +30,10 @@ public class LowLevelClientPacket extends LowLevelServerPacket {
         return this;
     }
 
+    public LowLevelClientPacket setCid(int cid) {
+        return setCid((short) (cid & 0xFFFF));
+    }
+    
     @Override
     public LowLevelClientPacket setMac(byte[] mac) {
         return (LowLevelClientPacket) super.setMac(mac);

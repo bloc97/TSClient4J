@@ -13,6 +13,14 @@ package packets;
 public interface LowLevelPacket {
     public static final int MAC_LENGTH = 8;
     
+    public default void initEmptyRaw() {
+        initEmptyRaw(0);
+    }
+    
+    public default void initEmptyRaw(int payloadSize) {
+        setRaw(new byte[getMacLength() + getHeaderLength() + payloadSize]);
+    }
+    
     public byte[] getRaw();
     
     public LowLevelPacket setRaw(byte[] raw);

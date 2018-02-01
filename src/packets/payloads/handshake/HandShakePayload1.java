@@ -17,7 +17,6 @@ public final class HandShakePayload1 extends InitPayload {
     
     public HandShakePayload1(byte[] payload, HandShakePayload0 payload0) {
         setRaw(payload);
-        
         if (!Arrays.equals(payload0.getRandomBytesA0Copy(), getA0Copy())) {
             throw new IllegalArgumentException("Discrepancy between Handshake Packet 0 and Packet 1.");
         }
@@ -35,8 +34,12 @@ public final class HandShakePayload1 extends InitPayload {
     }
     public byte[] getA0Copy() {
         byte[] a0 = getReversedA0Copy();
-        Collections.reverse(Arrays.asList(a0));
-        return a0;
+        byte[] a0rev = new byte[a0.length];
+        for (int i=0; i<a0.length; i++) {
+            a0rev[a0.length - 1 - i] = a0[i];
+        }
+        //Collections.reverse(Arrays.asList(a0));
+        return a0rev;
     }
 
     @Override

@@ -37,4 +37,5 @@ public class InitPacket<E extends InitPayload> extends HighLevelPacket<InitPacke
     public PacketType getType() {
         return PacketType.INIT;
     }
+    
 }
